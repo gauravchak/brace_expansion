@@ -17,3 +17,4 @@ Brace expansions can be nested:
 ```
   {a,b{1..3},c}  => a b1 b2 b3 c
 ```
+[Reference:](https://www.linuxjournal.com/content/bash-brace-expansion)
