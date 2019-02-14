@@ -334,3 +334,6 @@ ASALocalRun/
 .mypy_cache
 .vscode
 .ipynb_checkpoints
+
+# CPP test files
+test_cpp*.cpp
