@@ -39,7 +39,8 @@ class BENode(object):
                 # turn into concat
                 self.type = 'CONCAT'
                 if (self.my_str):
-                    # Only add a child string node if the current string is non-empty
+                    # Only add a child string node if and only if the current string is non-empty
+                    # If it is empty then we have encountered '{' at the first step
                     self.concat_children = [BENode()]
                     self.concat_children[0].actively_parsing = False
                     self.concat_children[0].parent = self
