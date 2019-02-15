@@ -16,3 +16,17 @@ Brace expansions can be nested:
 
 Reference: https://www.linuxjournal.com/content/bash-brace-expansion
 '''
+
+from typing import List
+from get_list_of_strings import get_list_of_str_from_list
+
+
+def brace_expansion_vec(complex_str: str) -> List[str]:
+    # Build a tree of nodes
+    # Get a list of list of strings from this tree
+    # From this list of lists of strings, make a list of strings
+    return ([])  # TODO implement
+
+
+def brace_expansion(complex_str: str) -> str:
+    return " ".join(brace_expansion_vec(complex_str))
