@@ -18,11 +18,17 @@ Reference: https://www.linuxjournal.com/content/bash-brace-expansion
 '''
 
 from typing import List
+
 from get_list_of_strings import get_list_of_str_from_list
+from betree import BENode
 
 
 def brace_expansion_vec(complex_str: str) -> List[str]:
     # Build a tree of nodes
+    root_node = BENode()
+    for i in range(0, len(complex_str)):
+        root_node.parse_next_char(complex_str[i])
+    root_node.handle_eof()
     # Get a list of list of strings from this tree
     # From this list of lists of strings, make a list of strings
     return ([])  # TODO implement
