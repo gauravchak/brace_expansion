@@ -19,19 +19,29 @@ Reference: https://www.linuxjournal.com/content/bash-brace-expansion
 
 from typing import List
 
-from get_list_of_strings import get_list_of_str_from_list
 from betree import BENode
 
 
 def brace_expansion_vec(complex_str: str) -> List[str]:
     # Build a tree of nodes
     root_node = BENode()
-    for i in range(0, len(complex_str)):
-        root_node.parse_next_char(complex_str[i])
+    next_char_proc_already = False
+    for idx, next_char in enumerate(complex_str):
+        if next_char_proc_already:
+            # Ignore this iteration since it has been processed already
+            next_char_proc_already = False
+            continue
+        if ((next_char == '.') and (idx + 1 < len(complex_str)) and (complex_str[idx + 1] == '.')):
+            next_char = '..'
+            root_node.parse_next_char(next_char)
+            next_char_proc_already = True
+        else:
+            root_node.parse_next_char(next_char)
+    # The tree might need knowing that the string has ended. Hence call eof
     root_node.handle_eof()
-    # Get a list of list of strings from this tree
-    # From this list of lists of strings, make a list of strings
-    return ([])  # TODO implement
+    # Get a list of strings from this tree
+    list_of_strings = root_node.get_list_of_strings()
+    return (list_of_strings)  # TODO implement
 
 
 def brace_expansion(complex_str: str) -> str:
