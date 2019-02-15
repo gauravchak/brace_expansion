@@ -98,6 +98,7 @@ class BENode {
     } else {
       // Since we have read a '{' already, try to read '}' or ','
       // Either of these special characters means we have to do something for a BraceNode
+      // TODO: Handle nesting
       size_t found = input_str.find_first_of("},");
       if (found == string::npos) {  // No special character found till the end
         // Hence this is just string
@@ -118,8 +119,29 @@ class BENode {
         // output vector is just one string
         vec_strings_.push_back(str_);
         // This is interesting. This is the first time we have returned without reaching the end of the string.
-        // This is because we
+        // This is because we start with a '{' and then right after that we find a '}' or ','
+        // Both "{}" and "{," probably expand into nothing but themselves.
+        // Since this was a fancy node, we should return and tell the calling BENode that this node's job is done
+        // and the parent should handle the rest of the input string.
         return;
+      } else {
+        // special characters found in the middle. Like {a,b} or {a}
+        if (input_str.at(found) == '}') {
+          // This is also a simple string.
+          str_ = t_given_context_.string_read_so_far_ + input_str.substr(0, found + 1);
+          type_ = SIMPLE_STR;
+          string_length_read_by_node_ = found + 1;
+          // next index is not needed since we are calling return but still we are setting it.
+          next_idx_of_input_str += found + 1;
+          // child_nodes_ are empty
+          // output vector is just one string
+          vec_strings_.push_back(str_);
+          return;
+        } else {
+          // read character was ','
+          // Hence create a node of just the part before the ','
+          BENode *this_child_node_ = new BENode(ReadingContext(false, ""), input_str.substr(0, found))
+        }
       }
     }
 
