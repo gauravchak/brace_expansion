@@ -33,16 +33,33 @@ def brace_expansion_vec(complex_str: str) -> List[str]:
             continue
         if ((next_char == '.') and (idx + 1 < len(complex_str)) and (complex_str[idx + 1] == '.')):
             next_char = '..'
-            root_node.parse_next_char(next_char)
+            parsed = root_node.parse_next_char(next_char)
             next_char_proc_already = True
         else:
-            root_node.parse_next_char(next_char)
+            parsed = root_node.parse_next_char(next_char)
+            if not parsed:
+                root_node.whoami()
+                raise ValueError('Parsing failed at root node next_char={}'.format(next_char))
     # The tree might need knowing that the string has ended. Hence call eof
-    root_node.handle_eof()
+    parsed = root_node.handle_eof()
+    if not parsed:
+        raise ValueError('Parsing failed at root node EOF')
+    # print('\nFor debugging input {} tree-whoami:'.format(complex_str))
+    # root_node.whoami()
     # Get a list of strings from this tree
     list_of_strings = root_node.get_list_of_strings()
     return (list_of_strings)  # TODO implement
 
 
 def brace_expansion(complex_str: str) -> str:
-    return " ".join(brace_expansion_vec(complex_str))
+    '''
+    Takes a complex string like {ab,cd} and returns a brace expanded string like "ab cd"
+    '''
+    expanded_list_of_strings = brace_expansion_vec(complex_str)
+    ret_str = ''
+    try:
+        ret_str = " ".join(expanded_list_of_strings)
+    except TypeError:
+        if expanded_list_of_strings:
+            print('type = {} el1 = {}'.format(type(expanded_list_of_strings[0]), expanded_list_of_strings))
+    return (ret_str)

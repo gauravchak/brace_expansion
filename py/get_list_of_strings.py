@@ -6,6 +6,8 @@ def get_list_of_str_from_list(l_of_l_of_s: List[List[str]]) -> List[str]:
     Given a list of list of strings this returns a list of strings of all possible permutations.
     Given [['a'],['b','c'],['d']] returns ['abd', 'acd']
     '''
+    # TODelete
+    # print('DEBUG get_list_of_str_from_list called with {}'.format(l_of_l_of_s))
     if not l_of_l_of_s:
         # if the given list was empty then return an empty list
         return []
