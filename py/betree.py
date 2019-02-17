@@ -24,7 +24,19 @@ class BENode(object):
         self.orseq_children: List[BENode] = []
         self.orseq_delim_list: List[str] = []  # These are characters/strings between children of OR and SEQ
 
-    def whoami(self) -> None:
+    def print_entire_tree(self) -> None:
+        '''
+        This is a function that prints the entire tree. This may be used for debugging.
+        '''
+        if (self.parent == self):
+            self.print_tree_from_here()
+        else:
+            self.parent.print_entire_tree()
+
+    def print_tree_from_here(self) -> None:
+        '''
+        This is a function that prints the sub-tree from this node. This may be used for debugging.
+        '''
         print('About me {}'.format(self))
         if (self.parent == self):
             print('parent = self = {}'.format(self.parent))
@@ -37,7 +49,7 @@ class BENode(object):
             if self.concat_children:
                 for c in self.concat_children:
                     if c:
-                        c.whoami()
+                        c.print_tree_from_here()
             else:
                 print("I am a weird {} node with no children".format(self.type))
         elif (self.type == 'OR|SEQ') or (self.type == 'OR') or (self.type == 'SEQ'):
@@ -45,7 +57,7 @@ class BENode(object):
                 for idx, c in enumerate(self.orseq_children):
                     if (idx < len(self.orseq_delim_list)):
                         print('delim: {}'.format(self.orseq_delim_list[idx]))
-                    c.whoami()
+                    c.print_tree_from_here()
                 if (len(self.orseq_children) < len(self.orseq_delim_list)):
                     for idx in range(len(self.orseq_children), len(self.orseq_delim_list)):
                         print('end delim: {}'.format(self.orseq_delim_list[idx]))
@@ -173,12 +185,26 @@ class BENode(object):
                     # Usual case
                     parsed = self.concat_children[-1].parse_next_char(next_char)
                     if parsed:
-                        return parsed
+                        return (parsed)
                     else:
-                        print("Debug parse_next_char::CONCAT WHOMAI")
-                        self.whoami()
-                        raise ValueError(
-                            'Why have we received a False to parsing in CONCAT? next_char = {}'.format(next_char))
+                        # This is a case like a{{0,3}2}
+                        # The STR node processing 2 says that it cannot parse } and is sending it up.
+                        if (self.parent != self):
+                            # If this is a non-root CONCAT node, then above this there could be a OR|SEQ node,
+                            # and we should close shop and pass it up.
+                            self.actively_parsing = False
+                            self.set_list_of_strings()
+                            return (False)
+                        else:
+                            # If this is root, we should start a new STR with this character and return true
+                            self.concat_children.append(BENode())
+                            # We are adding a closed node since it has already been parsed. Hence actively_parsing is False
+                            self.concat_children[-1].actively_parsing = False
+                            self.concat_children[-1].parent = self
+                            self.concat_children[-1].type = 'STR'
+                            self.concat_children[-1].my_str = next_char
+                            self.concat_children[-1].set_list_of_strings()
+                            return (True)
                 else:
                     # This can happen if the last child was a SEQ or OR and it sets actively_parsing = False
                     # Hence we have to add a new node. Since we don't know much about it, we are adding a STR
@@ -275,9 +301,18 @@ class BENode(object):
                 # then str_list = list(filter(None, str_list))
                 # would make it ['a', 'df']
                 self.list_str = list(filter(None, self.list_str))
+            elif ((len(self.orseq_delim_list) == 2) and (self.orseq_delim_list[0] == '{')
+                  and (self.orseq_delim_list[-1] == '}') and (len(self.orseq_children) == 1)):
+                # It could be "{{0,3,}2}" Hence it is an OR node with one element.
+                # In this case we should set self.list_str to the child's list_str but add { at the beginning
+                # and } at the end of each string
+                # Valid but simple OR
+                self.type = 'OR'
+                self.list_str = self.orseq_children[0].get_list_of_strings()
+                self.list_str = ['{' + t_str + '}' for t_str in self.list_str]
             else:
-                # TODO: It could be "{{0,3,}2}"
-                # In this case we should make it a CONCAT node and create strings like that.
+                # Unhandled
+                self.print_tree_from_here()
                 raise ValueError(
                     'OR|SEQ node does not look right. Delims: {} Lendelims = {} Delimset = {} Numchildren = {}'.format(
                         ' '.join(self.orseq_delim_list), len(self.orseq_delim_list), set(self.orseq_delim_list[1:-1]),
@@ -298,5 +333,5 @@ class BENode(object):
     def get_list_of_strings(self) -> List[str]:
         # TODelete
         # if self.list_str == ['0', '1', '2', '3']:
-        #     self.whoami()
+        #     self.print_entire_tree()
         return (self.list_str)
