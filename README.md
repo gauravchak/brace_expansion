@@ -1,4 +1,4 @@
-# brace_expansion
+# brace expansion of strings
 Implement Bash Brace Expansion in C++ and Python 
 
 Some examples and what they expand to:
