@@ -23,6 +23,7 @@ from betree import BENode
 
 
 def brace_expansion_vec(complex_str: str) -> List[str]:
+    '''Takes a complex string like {ab,cd} and returns a List of strings like ['ab','cd']'''
     # Build a tree of nodes
     root_node = BENode()
     next_char_proc_already = False
@@ -38,17 +39,17 @@ def brace_expansion_vec(complex_str: str) -> List[str]:
         else:
             parsed = root_node.parse_next_char(next_char)
             if not parsed:
-                root_node.whoami()
+                root_node.print_entire_tree()
                 raise ValueError('Parsing failed at root node next_char={}'.format(next_char))
     # The tree might need knowing that the string has ended. Hence call eof
     parsed = root_node.handle_eof()
     if not parsed:
         raise ValueError('Parsing failed at root node EOF')
     # print('\nFor debugging input {} tree-whoami:'.format(complex_str))
-    # root_node.whoami()
+    # root_node.print_entire_tree()
     # Get a list of strings from this tree
     list_of_strings = root_node.get_list_of_strings()
-    return (list_of_strings)  # TODO implement
+    return (list_of_strings)
 
 
 def brace_expansion(complex_str: str) -> str:
